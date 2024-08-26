@@ -1,0 +1,141 @@
+//@version=5
+indicator("just Buy", overlay = true, timeframe = "", timeframe_gaps = true)
+// old supertrend
+atrPeriod = input.int(10,    "ATR Length", minval = 1)
+factor =    input.float(3.0, "Factor",     minval = 0.01, step = 0.01)
+
+[supertrend, direction] = ta.supertrend(factor, atrPeriod)
+
+supertrend := barstate.isfirst ? na : supertrend
+upTrend =    plot(direction < 0 ? supertrend : na, "Up Trend",   color = color.green, style = plot.style_linebr)
+downTrend =  plot(direction < 0 ? na : supertrend, "Down Trend", color = color.red,   style = plot.style_linebr)
+bodyMiddle = plot(barstate.isfirst ? na : (open + close) / 2, "Body Middle",display = display.none)
+
+fill(bodyMiddle, upTrend,   color.new(color.green, 90), fillgaps = false)
+fill(bodyMiddle, downTrend, color.new(color.red,   90), fillgaps = false)
+
+alertcondition(direction[1] > direction, title='Downtrend to Uptrend', message='The Supertrend value switched from Downtrend to Uptrend ')
+alertcondition(direction[1] < direction, title='Uptrend to Downtrend', message='The Supertrend value switched from Uptrend to Downtrend')
+alertcondition(direction[1] != direction, title='Trend Change', message='The Supertrend value switched from Uptrend to Downtrend or vice versa')
+// 
+barcolor(direction < 0 and  supertrend > low ? color.rgb(10, 255, 47): na)
+plotshape(direction < 0 and  supertrend > low, "", shape.arrowup,  location.belowbar,   color.white ,   textcolor=color.rgb(34, 255, 0) ,size="huge",  text = "TAPPA" )
+//@version=5
+// indicator("EMA with SMA Condition", overlay=true)
+
+len1 = input.int(44, title="Length1", minval=1)
+src1 = input(defval=close, title="Source1")
+offset1 = input.int(0, title="Offset", minval=-500, maxval=500)
+len2 = input.int(20, title="Length1", minval=1)
+src2 = input(defval=close, title="Source1")
+offset2 = input.int(0, title="Offset", minval=-500, maxval=500)
+
+
+
+smaCondition = ta.sma(src1, len1)
+smaCondition2 = ta.sma(src2, len2)
+// ma only
+plot(smaCondition , color=color.rgb(0, 255, 8), title="44", linewidth=2)
+plot(smaCondition2 , color=color.rgb(0, 225, 255), title="20", linewidth=2)
+
+barcolor( smaCondition>= low and high >= smaCondition and close > open ? color.rgb(10, 255, 243): na)
+plotshape(smaCondition>= low and high >= smaCondition and close > open, "", shape.arrowup,  location.belowbar,   color.white ,   textcolor=color.rgb(249, 249, 249) ,size="huge",  text = "44 + G⬆️" )
+// ma + st
+barcolor(  supertrend < high and  smaCondition > low and high >smaCondition  ? color.rgb(251, 255, 0): na)
+plotshape( supertrend < high and  smaCondition > low and high >smaCondition , "kfdgkdf", shape.arrowup,  location.belowbar,   color.yellow ,   textcolor=color.rgb(246, 255, 0) ,size="huge",  text = "44" )
+
+
+// open = low 
+barcolor(  open == high   ? color.rgb(255, 0, 221): na)
+plotshape(open == high, "", shape.arrowup,   location.abovebar, color.rgb(253, 0, 181), textcolor = color.white, size="huge",  text = "OH")
+
+// 
+
+
+amplitude = input(title='Amplitude', defval=2, group="HalfTrend")
+channelDeviation = input(title='Channel Deviation', defval=2)
+showArrows = input(title='Show Arrows', defval=true)
+showChannels = input(title='Show Channels', defval=false)
+
+var int trend = 0
+var int nextTrend = 0
+var float maxLowPrice = nz(low[1], low)
+var float minHighPrice = nz(high[1], high)
+
+var float up = 0.0
+var float down = 0.0
+float atrHigh = 0.0
+float atrLow = 0.0
+float arrowUp = na
+float arrowDown = na
+
+atr2 = ta.atr(100) / 2
+dev = channelDeviation * atr2
+
+highPrice = high[math.abs(ta.highestbars(amplitude))]
+lowPrice = low[math.abs(ta.lowestbars(amplitude))]
+highma = ta.sma(high, amplitude)
+lowma = ta.sma(low, amplitude)
+
+if nextTrend == 1
+    maxLowPrice := math.max(lowPrice, maxLowPrice)
+
+    if highma < maxLowPrice and close < nz(low[1], low)
+        trend := 1
+        nextTrend := 0
+        minHighPrice := highPrice
+        minHighPrice
+else
+    minHighPrice := math.min(highPrice, minHighPrice)
+
+    if lowma > minHighPrice and close > nz(high[1], high)
+        trend := 0
+        nextTrend := 1
+        maxLowPrice := lowPrice
+        maxLowPrice
+
+if trend == 0
+    if not na(trend[1]) and trend[1] != 0
+        up := na(down[1]) ? down : down[1]
+        arrowUp := up - atr2
+        arrowUp
+    else
+        up := na(up[1]) ? maxLowPrice : math.max(maxLowPrice, up[1])
+        up
+    atrHigh := up + dev
+    atrLow := up - dev
+    atrLow
+else
+    if not na(trend[1]) and trend[1] != 1
+        down := na(up[1]) ? up : up[1]
+        arrowDown := down + atr2
+        arrowDown
+    else
+        down := na(down[1]) ? minHighPrice : math.min(minHighPrice, down[1])
+        down
+    atrHigh := down + dev
+    atrLow := down - dev
+    atrLow
+
+ht = trend == 0 ? up : down
+
+var color buyColor = color.blue
+var color sellColor = color.red
+
+htColor = trend == 0 ? buyColor : sellColor
+htPlot = plot(ht, title='HalfTrend', linewidth=2, color=htColor)
+
+atrHighPlot = plot(showChannels ? atrHigh : na, title='ATR High', style=plot.style_circles, color=color.new(sellColor, 0))
+atrLowPlot = plot(showChannels ? atrLow : na, title='ATR Low', style=plot.style_circles, color=color.new(buyColor, 0))
+
+fill(htPlot, atrHighPlot, title='ATR High Ribbon', color=color.new(sellColor, 90))
+fill(htPlot, atrLowPlot, title='ATR Low Ribbon', color=color.new(buyColor, 90))
+
+buySignal = not na(arrowUp) and trend == 0 and trend[1] == 1
+sellSignal = not na(arrowDown) and trend == 1 and trend[1] == 0
+
+plotshape(showArrows and buySignal ? atrLow : na, title='Arrow Up', style=shape.triangleup, location=location.absolute, size=size.tiny, color=color.new(buyColor, 0))
+plotshape(showArrows and sellSignal ? atrHigh : na, title='Arrow Down', style=shape.triangledown, location=location.absolute, size=size.tiny, color=color.new(sellColor, 0))
+
+alertcondition(buySignal, title='Alert: HalfTrend Buy', message='HalfTrend Buy')
+alertcondition(sellSignal, title='Alert: HalfTrend Sell', message='HalfTrend Sell')

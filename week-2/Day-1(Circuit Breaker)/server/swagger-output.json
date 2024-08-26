@@ -1,0 +1,172 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "My Todo API",
+    "description": "Description",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:4000"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Todo",
+      "description": "Operations related to todo items"
+    }
+  ],
+  "paths": {
+    "/{id}": {
+      "get": {
+        "summary": "Get by ID",
+        "tags": ["Todo"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "summary": "Get items",
+        "tags": ["Todo"],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/add": {
+      "post": {
+        "summary": "Add item",
+        "tags": ["Todo"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["task", "desc", "priority"],
+                "properties": {
+                  "task": {
+                    "type": "string",
+                    "example": "any"
+                  },
+                  "desc": {
+                    "type": "string",
+                    "example": "any"
+                  },
+                  "priority": {
+                    "type": "string",
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/delete/{todoId}": {
+      "delete": {
+        "summary": "Delete item by ID",
+        "tags": ["Todo"],
+        "parameters": [
+          {
+            "name": "todoId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/update/{todoId}": {
+      "put": {
+        "summary": "Update item by ID",
+        "tags": ["Todo"],
+        "parameters": [
+          {
+            "name": "todoId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["task", "desc", "priority"],
+                "properties": {
+                  "task": {
+                    "type": "string",
+                    "example": "any"
+                  },
+                  "desc": {
+                    "type": "string",
+                    "example": "any"
+                  },
+                  "priority": {
+                    "type": "string",
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,5 @@
+docker build -t  test-node .
+
+docker run -t -p 8000:8000   test-node
+docker ps 
+docker exec -it {{id here from img }} bash
